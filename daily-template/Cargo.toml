@@ -1,0 +1,18 @@
+[package]
+name = "{{project-name}}"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+itertools = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+
+[dev-dependencies]
+criterion = { workspace = true }
+rstest = { workspace = true }
+
+[[bench]]
+name = "{{project-name}}-bench"
+path = "benches/benchmarks.rs"
+harness = false

@@ -1,0 +1,6 @@
+/target/
+Cargo.lock
+.env
+day-*.bench.txt
+perf.*
+*/input.txt
