@@ -4,12 +4,8 @@ use rayon::iter::{ParallelBridge, ParallelIterator};
 fn test_password(password: &usize) -> bool {
     let password = password.to_string().chars().collect_vec();
     password.len() == 6
-        && password
-            .windows(2)
-            .any(|window| window[0] == window[1])
-        && password
-            .windows(2)
-            .all(|window| window[0] <= window[1])
+        && password.windows(2).any(|window| window[0] == window[1])
+        && password.windows(2).all(|window| window[0] <= window[1])
 }
 
 #[tracing::instrument]
