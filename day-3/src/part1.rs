@@ -1,35 +1,11 @@
 use ahash::{HashSet, HashSetExt};
-use derive_more::derive::IsVariant;
 
-#[derive(Clone, Copy, PartialEq, Eq, Debug, IsVariant)]
-enum Direction {
-    Up,
-    Down,
-    Left,
-    Right,
-}
-
-fn parse_path(path: &str) -> Vec<(Direction, u16)> {
-    path.split(',')
-        .map(|dir| {
-            let (dir, val) = dir.split_at(1);
-            let val = val.parse().unwrap();
-            let dir = match dir {
-                "U" => Direction::Up,
-                "D" => Direction::Down,
-                "L" => Direction::Left,
-                "R" => Direction::Right,
-                _ => panic!("Invalid direction"),
-            };
-            (dir, val)
-        })
-        .collect()
-}
+use crate::Direction;
 
 #[tracing::instrument]
 pub fn process(input: &str) -> String {
     let (path_a, path_b) = input.split_once("\n").expect("should be exactly two lines");
-    let (path_a, path_b) = (parse_path(path_a.trim()), parse_path(path_b.trim()));
+    let (path_a, path_b) = (crate::parse_path(path_a.trim()), crate::parse_path(path_b.trim()));
     let mut line_a = HashSet::new();
     // let line_b = HashSet::new();
     let mut x = 0isize;
