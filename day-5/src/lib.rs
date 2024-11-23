@@ -64,15 +64,71 @@ pub fn run_program(program: &mut [isize], input: Vec<isize>) -> Vec<isize> {
                 let dest = *program.get(index + 3).unwrap();
                 *program.get_mut::<usize>(dest.try_into().unwrap()).unwrap() = value1 * value2;
                 index += 4;
-            },
+            }
             3 => {
-                *program.get_mut::<usize>(value1.try_into().unwrap()).unwrap() = *input_iter.next().unwrap();
+                *program
+                    .get_mut::<usize>(value1.try_into().unwrap())
+                    .unwrap() = *input_iter.next().unwrap();
                 index += 2;
-            },
+            }
             4 => {
                 output.push(value1);
                 index += 2;
             }
+            5 => {
+                if value1 != 0 {
+                    let pos2 = *program.get(index + 2).unwrap();
+                    let value2 = if param2 {
+                        pos2
+                    } else {
+                        *program.get::<usize>(pos2.try_into().unwrap()).unwrap()
+                    };
+                    index = value2.try_into().unwrap();
+                }
+            },
+            6 => {
+                if value1 == 0 {
+                    let pos2 = *program.get(index + 2).unwrap();
+                    let value2 = if param2 {
+                        pos2
+                    } else {
+                        *program.get::<usize>(pos2.try_into().unwrap()).unwrap()
+                    };
+                    index = value2.try_into().unwrap();
+                }
+            },
+            7 => {
+                let pos2 = *program.get(index + 2).unwrap();
+                let value2 = if param2 {
+                    pos2
+                } else {
+                    *program.get::<usize>(pos2.try_into().unwrap()).unwrap()
+                };
+                let dest = *program.get(index + 3).unwrap();
+                let store = if value1 < value2 {
+                    1
+                } else {
+                    0
+                };
+                *program.get_mut::<usize>(dest.try_into().unwrap()).unwrap() = store;
+                index += 4;
+            },
+            8 => {
+                let pos2 = *program.get(index + 2).unwrap();
+                let value2 = if param2 {
+                    pos2
+                } else {
+                    *program.get::<usize>(pos2.try_into().unwrap()).unwrap()
+                };
+                let dest = *program.get(index + 3).unwrap();
+                let store = if value1 == value2 {
+                    1
+                } else {
+                    0
+                };
+                *program.get_mut::<usize>(dest.try_into().unwrap()).unwrap() = store;
+                index += 4;
+            },
             99 => {
                 // We cover this case above
                 unreachable!()
@@ -82,6 +138,8 @@ pub fn run_program(program: &mut [isize], input: Vec<isize>) -> Vec<isize> {
     }
     output
 }
+
+// TODO: Write tests for the 5-8 op codes as per the examples provided on the challenge page
 
 #[cfg(test)]
 mod tests {
