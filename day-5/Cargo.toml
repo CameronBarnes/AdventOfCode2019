@@ -16,3 +16,6 @@ rstest = { workspace = true }
 name = "day-5-bench"
 path = "benches/benchmarks.rs"
 harness = false
+
+[profile.ci]
+slow-timeout = { period = "5s", terminate-after = 3 }

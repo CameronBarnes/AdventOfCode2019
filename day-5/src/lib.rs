@@ -29,8 +29,9 @@ pub fn run_program(program: &mut [isize], input: Vec<isize>) -> Vec<isize> {
     let mut output = Vec::new();
     let mut index = 0;
     while index < program.len() {
+        // thread::sleep(Duration::from_millis(100));
         let operand = *program.get(index).unwrap();
-        println!("Index: {index}, Operand: {operand}");
+        // println!("Index: {index}, Operand: {operand}");
         let (operand, param1, param2, _param3) = parse_instruction(operand);
 
         if operand == 99 {
@@ -52,6 +53,7 @@ pub fn run_program(program: &mut [isize], input: Vec<isize>) -> Vec<isize> {
                     *program.get::<usize>(pos2.try_into().unwrap()).unwrap()
                 };
                 let dest = *program.get(index + 3).unwrap();
+                // println!("dest: {dest} = {value1} + {value2}");
                 *program.get_mut::<usize>(dest.try_into().unwrap()).unwrap() = value1 + value2;
                 index += 4;
             }
@@ -63,30 +65,35 @@ pub fn run_program(program: &mut [isize], input: Vec<isize>) -> Vec<isize> {
                     *program.get::<usize>(pos2.try_into().unwrap()).unwrap()
                 };
                 let dest = *program.get(index + 3).unwrap();
+                // println!("dest: {dest} = {value1} * {value2}");
                 *program.get_mut::<usize>(dest.try_into().unwrap()).unwrap() = value1 * value2;
                 index += 4;
             }
             3 => {
+                let input_value = *input_iter.next().unwrap();
+                // println!("dest: {value1} = {input_value}");
                 *program
                     .get_mut::<usize>(value1.try_into().unwrap())
-                    .unwrap() = *input_iter.next().unwrap();
+                    .unwrap() = input_value;
                 index += 2;
             }
             4 => {
-                println!("{value1}");
+                // println!("output: {value1}");
                 output.push(value1);
                 index += 2;
             }
             5 => {
                 if value1 != 0 {
                     let pos2 = *program.get(index + 2).unwrap();
-                    println!("pos2: {pos2}");
                     let value2 = if param2 {
                         pos2
                     } else {
                         *program.get::<usize>(pos2.try_into().unwrap()).unwrap()
                     };
+                    // println!("Index: {value2}");
                     index = value2.try_into().unwrap();
+                } else {
+                    index += 3;
                 }
             }
             6 => {
@@ -97,7 +104,10 @@ pub fn run_program(program: &mut [isize], input: Vec<isize>) -> Vec<isize> {
                     } else {
                         *program.get::<usize>(pos2.try_into().unwrap()).unwrap()
                     };
+                    // println!("Index = from: {pos2} = {value2}");
                     index = value2.try_into().unwrap();
+                } else {
+                    index += 3;
                 }
             }
             7 => {
@@ -109,6 +119,7 @@ pub fn run_program(program: &mut [isize], input: Vec<isize>) -> Vec<isize> {
                 };
                 let dest = *program.get(index + 3).unwrap();
                 let store = if value1 < value2 { 1 } else { 0 };
+                // println!("dest: {dest} = {store}");
                 *program.get_mut::<usize>(dest.try_into().unwrap()).unwrap() = store;
                 index += 4;
             }
@@ -121,6 +132,7 @@ pub fn run_program(program: &mut [isize], input: Vec<isize>) -> Vec<isize> {
                 };
                 let dest = *program.get(index + 3).unwrap();
                 let store = if value1 == value2 { 1 } else { 0 };
+                // println!("dest: {dest} = {store}");
                 *program.get_mut::<usize>(dest.try_into().unwrap()).unwrap() = store;
                 index += 4;
             }
@@ -266,5 +278,51 @@ mod tests {
         let mut program = parse_program("3,21,1008,21,8,20,1005,20,22,107,8,21,20,1006,20,31,1106,0,36,98,0,0,1002,21,125,20,4,20,1105,1,46,104,999,1105,1,46,1101,1000,1,20,4,20,1105,1,46,98,99");
         let results = run_program(&mut program, vec![input]);
         assert_eq!(*results.first().unwrap(), expected);
+    }
+
+    #[rstest]
+    #[case(-2)]
+    #[case(-1)]
+    #[case(0)]
+    #[case(1)]
+    #[case(2)]
+    #[case(3)]
+    #[case(4)]
+    #[case(5)]
+    #[case(6)]
+    #[case(7)]
+    #[case(8)]
+    #[case(9)]
+    #[case(10)]
+    #[case(-2311)]
+    #[case(12311)]
+    #[case(11)]
+    fn zero_if_zero_position(#[case] input: isize) {
+        let mut program = parse_program("3,12,6,12,15,1,13,14,13,4,13,99,-1,0,1,9");
+        let results = run_program(&mut program, vec![input]);
+        assert_eq!(*results.first().unwrap() == 0, input == 0);
+    }
+
+    #[rstest]
+    #[case(-2)]
+    #[case(-1)]
+    #[case(0)]
+    #[case(1)]
+    #[case(2)]
+    #[case(3)]
+    #[case(4)]
+    #[case(5)]
+    #[case(6)]
+    #[case(7)]
+    #[case(8)]
+    #[case(9)]
+    #[case(10)]
+    #[case(-2311)]
+    #[case(12311)]
+    #[case(11)]
+    fn zero_if_zero_immediate(#[case] input: isize) {
+        let mut program = parse_program("3,3,1105,-1,9,1101,0,0,12,4,12,99,1");
+        let results = run_program(&mut program, vec![input]);
+        assert_eq!(*results.first().unwrap() == 0, input == 0);
     }
 }
