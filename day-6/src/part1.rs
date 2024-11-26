@@ -25,8 +25,7 @@ fn count_object(mut depth: usize, object: Rc<RefCell<Object>>) -> usize {
     count
 }
 
-#[tracing::instrument]
-pub fn process(input: &str) -> String {
+fn load_map(input: &str) -> HashMap<String, Rc<RefCell<Object>>> {
     let mut map: HashMap<String, Rc<RefCell<Object>>> = HashMap::new();
     input
         .lines()
@@ -37,7 +36,12 @@ pub fn process(input: &str) -> String {
                 .and_modify(|object| object.borrow_mut().children.push(child.clone()))
                 .or_insert(Rc::new(RefCell::new(Object::new_with_child(child))));
         });
+    map
+}
 
+#[tracing::instrument]
+pub fn process(input: &str) -> String {
+    let map = load_map(input);
     count_object(0, map.get("COM").unwrap().clone()).to_string()
 }
 
