@@ -11,10 +11,10 @@ struct Object {
 }
 
 impl Object {
-    fn new(name: impl ToString, parent: Option<Rc<RefCell<Object>>>) -> Self {
+    fn new(name: impl ToString) -> Self {
         Self {
             name: name.to_string(),
-            parent,
+            parent: None,
             children: Vec::default(),
             depth: 0,
         }
@@ -22,23 +22,19 @@ impl Object {
 
     fn new_with_new_child(
         name: impl ToString,
-        parent: Option<Rc<RefCell<Object>>>,
         child: impl ToString,
     ) -> (Rc<RefCell<Self>>, Rc<RefCell<Self>>) {
-        let this = Rc::new(RefCell::new(Self::new(name, parent)));
-        let child = Rc::new(RefCell::new(Self::new(child, Some(this.clone()))));
+        let this = Rc::new(RefCell::new(Self::new(name)));
+        let child = Rc::new(RefCell::new(Self::new(child)));
+        child.borrow_mut().set_parent(this.clone());
         this.borrow_mut().children.push(child.clone());
         (this, child)
     }
 
-    fn new_with_child(
-        name: impl ToString,
-        parent: Option<Rc<RefCell<Object>>>,
-        child: Rc<RefCell<Object>>,
-    ) -> Rc<RefCell<Self>> {
+    fn new_with_child(name: impl ToString, child: Rc<RefCell<Object>>) -> Rc<RefCell<Self>> {
         let this = Rc::new(RefCell::new(Self {
             name: name.to_string(),
-            parent,
+            parent: None,
             children: vec![child.clone()],
             depth: 0,
         }));
@@ -48,11 +44,15 @@ impl Object {
 
     fn set_depth(&mut self, depth: usize) {
         self.depth = depth;
-        self.print();
+        // self.print();
         assert_eq!(self.depth == 0, self.parent.is_none());
         for child in &self.children {
             child.borrow_mut().set_depth(self.depth + 1);
         }
+    }
+
+    fn set_parent(&mut self, parent: Rc<RefCell<Object>>) {
+        self.parent = Some(parent);
     }
 
     fn get_parent(&self) -> Option<Rc<RefCell<Object>>> {
@@ -81,16 +81,22 @@ fn load_map(input: &str) -> HashMap<String, Rc<RefCell<Object>>> {
         .map(|line| line.trim().split_once(')').unwrap())
         .for_each(|(parent_name, child_name)| {
             if let Some(parent) = map.get(parent_name) {
-                let child = Rc::new(RefCell::new(Object::new(child_name, Some(parent.clone()))));
-                parent.borrow_mut().children.push(child.clone());
-                map.insert(child_name.to_string(), child);
+                if let Some(child) = map.get(child_name) {
+                    parent.borrow_mut().children.push(child.clone());
+                    child.borrow_mut().set_parent(parent.clone());
+                } else {
+                    let child = Rc::new(RefCell::new(Object::new(child_name)));
+                    parent.borrow_mut().children.push(child.clone());
+                    child.borrow_mut().set_parent(parent.clone());
+                    map.insert(child_name.to_string(), child);
+                }
             } else if let Some(child) = map.get(child_name) {
                 map.insert(
                     parent_name.to_string(),
-                    Object::new_with_child(parent_name, None, child.clone()),
+                    Object::new_with_child(parent_name, child.clone()),
                 );
             } else {
-                let (parent, child) = Object::new_with_new_child(parent_name, None, child_name);
+                let (parent, child) = Object::new_with_new_child(parent_name, child_name);
                 map.insert(parent_name.to_string(), parent);
                 map.insert(child_name.to_string(), child);
             }
@@ -172,6 +178,12 @@ pub fn process(input: &str) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_with_challenge_input() {
+        let input = include_str!("../input.txt");
+        assert_eq!("514", process(input));
+    }
 
     #[test]
     fn test_process() {
