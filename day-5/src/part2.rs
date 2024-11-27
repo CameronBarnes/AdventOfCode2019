@@ -17,9 +17,7 @@ mod tests {
 
     #[test]
     fn test_process() {
-        return;
-        todo!("Havent built test yet");
-        let input = "";
-        assert_eq!("", process(input));
+        let input = include_str!("../input.txt");
+        assert_eq!("10376124", process(input));
     }
 }
