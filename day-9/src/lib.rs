@@ -91,13 +91,12 @@ pub fn run_program(program: &mut Vec<isize>, input: Vec<isize>) -> Vec<isize> {
                 };
                 // FIXME: This needs to support relative mode, so we'll handle that as a special
                 // case here, and then fix this nightmare code later
-                let dest = *program.get(index + 3).unwrap();
+                let pos3 = *program.get(index + 3).unwrap();
                 let dest = if param3 == 2 {
-                    *program
-                        .get::<usize>((dest + relative).try_into().unwrap())
-                        .unwrap()
+                    println!("pos3: {pos3}, relative: {relative}, result: {}", pos3 + relative);
+                    pos3 + relative
                 } else {
-                    dest
+                    pos3
                 };
                 println!("dest: {dest} = {value1} + {value2}");
                 if dest as usize >= program.len() {
@@ -144,13 +143,12 @@ pub fn run_program(program: &mut Vec<isize>, input: Vec<isize>) -> Vec<isize> {
                 };
                 // FIXME: This needs to support relative mode, so we'll handle that as a special
                 // case here, and then fix this nightmare code later
-                let dest = *program.get(index + 3).unwrap();
+                let pos3 = *program.get(index + 3).unwrap();
                 let dest = if param3 == 2 {
-                    *program
-                        .get::<usize>((dest + relative).try_into().unwrap())
-                        .unwrap()
+                    println!("pos3: {pos3}, relative: {relative}, result: {}", pos3 + relative);
+                    pos3 + relative
                 } else {
-                    dest
+                    pos3
                 };
                 println!("dest: {dest} = {value1} * {value2}");
                 if dest as usize >= program.len() {
@@ -211,7 +209,7 @@ pub fn run_program(program: &mut Vec<isize>, input: Vec<isize>) -> Vec<isize> {
                         }
                         *program.get::<usize>(pos2.try_into().unwrap()).unwrap()
                     };
-                    println!("Index: {value2}");
+                    println!("Index = from: {pos2} = {value2}");
                     index = value2.try_into().unwrap();
                 } else {
                     index += 3;
@@ -276,16 +274,15 @@ pub fn run_program(program: &mut Vec<isize>, input: Vec<isize>) -> Vec<isize> {
                 };
                 // FIXME: This needs to support relative mode, so we'll handle that as a special
                 // case here, and then fix this nightmare code later
-                let dest = *program.get(index + 3).unwrap();
+                let pos3 = *program.get(index + 3).unwrap();
                 let dest = if param3 == 2 {
-                    *program
-                        .get::<usize>((dest + relative).try_into().unwrap())
-                        .unwrap()
+                    println!("pos3: {pos3}, relative: {relative}, result: {}", pos3 + relative);
+                    pos3 + relative
                 } else {
-                    dest
+                    pos3
                 };
                 let store = if value1 < value2 { 1 } else { 0 };
-                println!("dest: {dest} = {store}");
+                println!("dest: {pos3}:{dest} = {store}. {pos1}:{value1} < {pos2}:{value2}");
                 if dest as usize >= program.len() {
                     program
                         .try_reserve((dest + 1) as usize - program.len())
@@ -330,13 +327,12 @@ pub fn run_program(program: &mut Vec<isize>, input: Vec<isize>) -> Vec<isize> {
                 };
                 // FIXME: This needs to support relative mode, so we'll handle that as a special
                 // case here, and then fix this nightmare code later
-                let dest = *program.get(index + 3).unwrap();
+                let pos3 = *program.get(index + 3).unwrap();
                 let dest = if param3 == 2 {
-                    *program
-                        .get::<usize>((dest + relative).try_into().unwrap())
-                        .unwrap()
+                    println!("pos3: {pos3}, relative: {relative}, result: {}", pos3 + relative);
+                    pos3 + relative
                 } else {
-                    dest
+                    pos3
                 };
                 let store = if value1 == value2 { 1 } else { 0 };
                 println!("dest: {dest} = {store}");
@@ -359,6 +355,7 @@ pub fn run_program(program: &mut Vec<isize>, input: Vec<isize>) -> Vec<isize> {
             }
             9 => {
                 relative += value1;
+                println!("increased relative index by: {value1} to {relative}");
                 index += 2;
             }
             99 => {
