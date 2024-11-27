@@ -33,7 +33,7 @@ pub fn run_program(program: &mut Vec<isize>, input: Vec<isize>) -> Vec<isize> {
         // thread::sleep(Duration::from_millis(100));
         let operand = *program.get(index).unwrap();
         println!("Index: {index}, Operand: {operand}");
-        let (operand, param1, param2, _param3) = parse_instruction(operand);
+        let (operand, param1, param2, param3) = parse_instruction(operand);
 
         if operand == 99 {
             break;
@@ -45,21 +45,23 @@ pub fn run_program(program: &mut Vec<isize>, input: Vec<isize>) -> Vec<isize> {
         } else if param1 == 2 {
             if (pos1 + relative) as usize >= program.len() {
                 program
-                    .try_reserve((pos1 + relative) as usize - program.len())
+                    .try_reserve((pos1 + relative + 1) as usize - program.len())
                     .unwrap_or_else(|_| {
-                        panic!("failed with size: {}", pos1 + relative);
+                        panic!("failed with size: {}", pos1 + relative + 1);
                     });
-                program.resize_with((pos1 + relative) as usize, || 0);
+                program.resize_with((pos1 + relative + 1) as usize, || 0);
             }
             *program
                 .get::<usize>((pos1 + relative).try_into().unwrap())
-                .unwrap_or(&0)
+                .unwrap()
         } else {
             if pos1 as usize >= program.len() {
-                program.try_reserve(pos1 as usize - program.len()).unwrap();
-                program.resize_with(pos1 as usize, || 0);
+                program
+                    .try_reserve((pos1 + 1) as usize - program.len())
+                    .unwrap();
+                program.resize_with((pos1 + 1) as usize, || 0);
             }
-            *program.get::<usize>(pos1.try_into().unwrap()).unwrap_or(&0)
+            *program.get::<usize>(pos1.try_into().unwrap()).unwrap()
         };
         match operand {
             1 => {
@@ -69,27 +71,40 @@ pub fn run_program(program: &mut Vec<isize>, input: Vec<isize>) -> Vec<isize> {
                 } else if param2 == 2 {
                     if (pos2 + relative) as usize >= program.len() {
                         program
-                            .try_reserve((pos2 + relative) as usize - program.len())
+                            .try_reserve((pos2 + relative + 1) as usize - program.len())
                             .unwrap_or_else(|_| {
-                                panic!("failed with size: {}", pos2 + relative);
+                                panic!("failed with size: {}", pos2 + relative + 1);
                             });
-                        program.resize_with((pos2 + relative) as usize, || 0);
+                        program.resize_with((pos2 + relative + 1) as usize, || 0);
                     }
                     *program
                         .get::<usize>((pos2 + relative).try_into().unwrap())
-                        .unwrap_or(&0)
+                        .unwrap()
                 } else {
                     if pos2 as usize >= program.len() {
-                        program.try_reserve(pos2 as usize - program.len()).unwrap();
-                        program.resize_with(pos2 as usize, || 0);
+                        program
+                            .try_reserve((pos2 + 1) as usize - program.len())
+                            .unwrap();
+                        program.resize_with((pos2 + 1) as usize, || 0);
                     }
-                    *program.get::<usize>(pos2.try_into().unwrap()).unwrap_or(&0)
+                    *program.get::<usize>(pos2.try_into().unwrap()).unwrap()
                 };
+                // FIXME: This needs to support relative mode, so we'll handle that as a special
+                // case here, and then fix this nightmare code later
                 let dest = *program.get(index + 3).unwrap();
+                let dest = if param3 == 2 {
+                    *program
+                        .get::<usize>((dest + relative).try_into().unwrap())
+                        .unwrap()
+                } else {
+                    dest
+                };
                 println!("dest: {dest} = {value1} + {value2}");
                 if dest as usize >= program.len() {
-                    program.try_reserve(dest as usize - program.len()).unwrap();
-                    program.resize_with(dest as usize, || 0);
+                    program
+                        .try_reserve((dest + 1) as usize - program.len())
+                        .unwrap();
+                    program.resize_with((dest + 1) as usize, || 0);
                 }
                 let len = program.len();
                 *program
@@ -109,27 +124,40 @@ pub fn run_program(program: &mut Vec<isize>, input: Vec<isize>) -> Vec<isize> {
                 } else if param2 == 2 {
                     if (pos2 + relative) as usize >= program.len() {
                         program
-                            .try_reserve((pos2 + relative) as usize - program.len())
+                            .try_reserve((pos2 + relative + 1) as usize - program.len())
                             .unwrap_or_else(|_| {
-                                panic!("failed with size: {}", pos2 + relative);
+                                panic!("failed with size: {}", pos2 + relative + 1);
                             });
-                        program.resize_with((pos2 + relative) as usize, || 0);
+                        program.resize_with((pos2 + relative + 1) as usize, || 0);
                     }
                     *program
                         .get::<usize>((pos2 + relative).try_into().unwrap())
-                        .unwrap_or(&0)
+                        .unwrap()
                 } else {
                     if pos2 as usize >= program.len() {
-                        program.try_reserve(pos2 as usize - program.len()).unwrap();
-                        program.resize_with(pos2 as usize, || 0);
+                        program
+                            .try_reserve((pos2 + 1) as usize - program.len())
+                            .unwrap();
+                        program.resize_with((pos2 + 1) as usize, || 0);
                     }
-                    *program.get::<usize>(pos2.try_into().unwrap()).unwrap_or(&0)
+                    *program.get::<usize>(pos2.try_into().unwrap()).unwrap()
                 };
+                // FIXME: This needs to support relative mode, so we'll handle that as a special
+                // case here, and then fix this nightmare code later
                 let dest = *program.get(index + 3).unwrap();
+                let dest = if param3 == 2 {
+                    *program
+                        .get::<usize>((dest + relative).try_into().unwrap())
+                        .unwrap()
+                } else {
+                    dest
+                };
                 println!("dest: {dest} = {value1} * {value2}");
                 if dest as usize >= program.len() {
-                    program.try_reserve(dest as usize - program.len()).unwrap();
-                    program.resize_with(dest as usize, || 0);
+                    program
+                        .try_reserve((dest + 1) as usize - program.len())
+                        .unwrap();
+                    program.resize_with((dest + 1) as usize, || 0);
                 }
                 let len = program.len();
                 *program
@@ -144,6 +172,8 @@ pub fn run_program(program: &mut Vec<isize>, input: Vec<isize>) -> Vec<isize> {
             }
             3 => {
                 let input_value = *input_iter.next().unwrap();
+                // Handle the special case for this opcode
+                let value1 = if param1 == 2 { pos1 + relative } else { value1 };
                 println!("dest: {value1} = {input_value}");
                 *program
                     .get_mut::<usize>(value1.try_into().unwrap())
@@ -163,21 +193,23 @@ pub fn run_program(program: &mut Vec<isize>, input: Vec<isize>) -> Vec<isize> {
                     } else if param2 == 2 {
                         if (pos2 + relative) as usize >= program.len() {
                             program
-                                .try_reserve((pos2 + relative) as usize - program.len())
+                                .try_reserve((pos2 + relative + 1) as usize - program.len())
                                 .unwrap_or_else(|_| {
-                                    panic!("failed with size: {}", pos2 + relative);
+                                    panic!("failed with size: {}", pos2 + relative + 1);
                                 });
-                            program.resize_with((pos2 + relative) as usize, || 0);
+                            program.resize_with((pos2 + relative + 1) as usize, || 0);
                         }
                         *program
                             .get::<usize>((pos2 + relative).try_into().unwrap())
-                            .unwrap_or(&0)
+                            .unwrap()
                     } else {
                         if pos2 as usize >= program.len() {
-                            program.try_reserve(pos2 as usize - program.len()).unwrap();
-                            program.resize_with(pos2 as usize, || 0);
+                            program
+                                .try_reserve((pos2 + 1) as usize - program.len())
+                                .unwrap();
+                            program.resize_with((pos2 + 1) as usize, || 0);
                         }
-                        *program.get::<usize>(pos2.try_into().unwrap()).unwrap_or(&0)
+                        *program.get::<usize>(pos2.try_into().unwrap()).unwrap()
                     };
                     println!("Index: {value2}");
                     index = value2.try_into().unwrap();
@@ -193,21 +225,23 @@ pub fn run_program(program: &mut Vec<isize>, input: Vec<isize>) -> Vec<isize> {
                     } else if param2 == 2 {
                         if (pos2 + relative) as usize >= program.len() {
                             program
-                                .try_reserve((pos2 + relative) as usize - program.len())
+                                .try_reserve((pos2 + relative + 1) as usize - program.len())
                                 .unwrap_or_else(|_| {
-                                    panic!("failed with size: {}", pos2 + relative);
+                                    panic!("failed with size: {}", pos2 + relative + 1);
                                 });
-                            program.resize_with((pos2 + relative) as usize, || 0);
+                            program.resize_with((pos2 + relative + 1) as usize, || 0);
                         }
                         *program
                             .get::<usize>((pos2 + relative).try_into().unwrap())
-                            .unwrap_or(&0)
+                            .unwrap()
                     } else {
                         if pos2 as usize >= program.len() {
-                            program.try_reserve(pos2 as usize - program.len()).unwrap();
-                            program.resize_with(pos2 as usize, || 0);
+                            program
+                                .try_reserve((pos2 + 1) as usize - program.len())
+                                .unwrap();
+                            program.resize_with((pos2 + 1) as usize, || 0);
                         }
-                        *program.get::<usize>(pos2.try_into().unwrap()).unwrap_or(&0)
+                        *program.get::<usize>(pos2.try_into().unwrap()).unwrap()
                     };
                     println!("Index = from: {pos2} = {value2}");
                     index = value2.try_into().unwrap();
@@ -222,28 +256,41 @@ pub fn run_program(program: &mut Vec<isize>, input: Vec<isize>) -> Vec<isize> {
                 } else if param2 == 2 {
                     if (pos2 + relative) as usize >= program.len() {
                         program
-                            .try_reserve((pos2 + relative) as usize - program.len())
+                            .try_reserve((pos2 + relative + 1) as usize - program.len())
                             .unwrap_or_else(|_| {
-                                panic!("failed with size: {}", pos2 + relative);
+                                panic!("failed with size: {}", pos2 + relative + 1);
                             });
-                        program.resize_with((pos2 + relative) as usize, || 0);
+                        program.resize_with((pos2 + relative + 1) as usize, || 0);
                     }
                     *program
                         .get::<usize>((pos2 + relative).try_into().unwrap())
-                        .unwrap_or(&0)
+                        .unwrap()
                 } else {
                     if pos2 as usize >= program.len() {
-                        program.try_reserve(pos2 as usize - program.len()).unwrap();
-                        program.resize_with(pos2 as usize, || 0);
+                        program
+                            .try_reserve((pos2 + 1) as usize - program.len())
+                            .unwrap();
+                        program.resize_with((pos2 + 1) as usize, || 0);
                     }
-                    *program.get::<usize>(pos2.try_into().unwrap()).unwrap_or(&0)
+                    *program.get::<usize>(pos2.try_into().unwrap()).unwrap()
                 };
+                // FIXME: This needs to support relative mode, so we'll handle that as a special
+                // case here, and then fix this nightmare code later
                 let dest = *program.get(index + 3).unwrap();
+                let dest = if param3 == 2 {
+                    *program
+                        .get::<usize>((dest + relative).try_into().unwrap())
+                        .unwrap()
+                } else {
+                    dest
+                };
                 let store = if value1 < value2 { 1 } else { 0 };
                 println!("dest: {dest} = {store}");
                 if dest as usize >= program.len() {
-                    program.try_reserve(dest as usize - program.len()).unwrap();
-                    program.resize_with(dest as usize, || 0);
+                    program
+                        .try_reserve((dest + 1) as usize - program.len())
+                        .unwrap();
+                    program.resize_with((dest + 1) as usize, || 0);
                 }
                 let len = program.len();
                 *program
@@ -263,32 +310,46 @@ pub fn run_program(program: &mut Vec<isize>, input: Vec<isize>) -> Vec<isize> {
                 } else if param2 == 2 {
                     if (pos2 + relative) as usize >= program.len() {
                         program
-                            .try_reserve((pos2 + relative) as usize - program.len())
+                            .try_reserve((pos2 + relative + 1) as usize - program.len())
                             .unwrap_or_else(|_| {
-                                panic!("failed with size: {}", pos2 + relative);
+                                panic!("failed with size: {}", pos2 + relative + 1);
                             });
-                        program.resize_with((pos2 + relative) as usize, || 0);
+                        program.resize_with((pos2 + relative + 1) as usize, || 0);
                     }
                     *program
                         .get::<usize>((pos2 + relative).try_into().unwrap())
-                        .unwrap_or(&0)
+                        .unwrap()
                 } else {
                     if pos2 as usize >= program.len() {
-                        program.try_reserve(pos2 as usize - program.len()).unwrap();
-                        program.resize_with(pos2 as usize, || 0);
+                        program
+                            .try_reserve((pos2 + 1) as usize - program.len())
+                            .unwrap();
+                        program.resize_with((pos2 + 1) as usize, || 0);
                     }
-                    *program.get::<usize>(pos2.try_into().unwrap()).unwrap_or(&0)
+                    *program.get::<usize>(pos2.try_into().unwrap()).unwrap()
                 };
+                // FIXME: This needs to support relative mode, so we'll handle that as a special
+                // case here, and then fix this nightmare code later
                 let dest = *program.get(index + 3).unwrap();
+                let dest = if param3 == 2 {
+                    *program
+                        .get::<usize>((dest + relative).try_into().unwrap())
+                        .unwrap()
+                } else {
+                    dest
+                };
                 let store = if value1 == value2 { 1 } else { 0 };
                 println!("dest: {dest} = {store}");
                 if dest as usize >= program.len() {
-                    // TODO: Keep fixing the off by one error like it has been bellow
-                    program.try_reserve((dest + 1) as usize - program.len()).unwrap();
+                    program
+                        .try_reserve((dest + 1) as usize - program.len())
+                        .unwrap();
                     program.resize_with((dest + 1) as usize, || 0);
                 }
                 let len = program.len();
-                *program.get_mut::<usize>(dest.try_into().unwrap()).unwrap_or_else(|| {
+                *program
+                    .get_mut::<usize>(dest.try_into().unwrap())
+                    .unwrap_or_else(|| {
                         panic!(
                             "Failed to get: {}, with program memory length: {}",
                             dest, len

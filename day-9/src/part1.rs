@@ -5,6 +5,7 @@ use crate::{parse_program, run_program};
 pub fn process(input: &str) -> String {
     let mut program  = parse_program(input);
     let output = run_program(&mut program, vec![1]);
+    println!("{output:?}");
     output.last().unwrap().to_string()
 }
 
