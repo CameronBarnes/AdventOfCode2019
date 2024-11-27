@@ -5,7 +5,6 @@ use crate::{parse_program, run_program};
 pub fn process(input: &str) -> String {
     let mut program  = parse_program(input);
     let output = run_program(&mut program, vec![1]);
-    println!("{output:?}");
     output.last().unwrap().to_string()
 }
 
@@ -15,8 +14,7 @@ mod tests {
 
     #[test]
     fn test_process() {
-        todo!("Havent built test yet");
-        let input = "";
-        assert_eq!("", process(input));
+        let input = include_str!("../input.txt");
+        assert_eq!("2752191671", process(input));
     }
 }

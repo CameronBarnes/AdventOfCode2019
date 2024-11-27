@@ -1,3 +1,5 @@
+use tracing::debug;
+
 pub mod part1;
 pub mod part2;
 
@@ -32,7 +34,7 @@ pub fn run_program(program: &mut Vec<isize>, input: Vec<isize>) -> Vec<isize> {
     while index < program.len() {
         // thread::sleep(Duration::from_millis(100));
         let operand = *program.get(index).unwrap();
-        println!("Index: {index}, Operand: {operand}");
+        debug!("Index: {index}, Operand: {operand}");
         let (operand, param1, param2, param3) = parse_instruction(operand);
 
         if operand == 99 {
@@ -93,12 +95,12 @@ pub fn run_program(program: &mut Vec<isize>, input: Vec<isize>) -> Vec<isize> {
                 // case here, and then fix this nightmare code later
                 let pos3 = *program.get(index + 3).unwrap();
                 let dest = if param3 == 2 {
-                    println!("pos3: {pos3}, relative: {relative}, result: {}", pos3 + relative);
+                    debug!("pos3: {pos3}, relative: {relative}, result: {}", pos3 + relative);
                     pos3 + relative
                 } else {
                     pos3
                 };
-                println!("dest: {dest} = {value1} + {value2}");
+                debug!("dest: {dest} = {value1} + {value2}");
                 if dest as usize >= program.len() {
                     program
                         .try_reserve((dest + 1) as usize - program.len())
@@ -145,12 +147,12 @@ pub fn run_program(program: &mut Vec<isize>, input: Vec<isize>) -> Vec<isize> {
                 // case here, and then fix this nightmare code later
                 let pos3 = *program.get(index + 3).unwrap();
                 let dest = if param3 == 2 {
-                    println!("pos3: {pos3}, relative: {relative}, result: {}", pos3 + relative);
+                    debug!("pos3: {pos3}, relative: {relative}, result: {}", pos3 + relative);
                     pos3 + relative
                 } else {
                     pos3
                 };
-                println!("dest: {dest} = {value1} * {value2}");
+                debug!("dest: {dest} = {value1} * {value2}");
                 if dest as usize >= program.len() {
                     program
                         .try_reserve((dest + 1) as usize - program.len())
@@ -172,14 +174,14 @@ pub fn run_program(program: &mut Vec<isize>, input: Vec<isize>) -> Vec<isize> {
                 let input_value = *input_iter.next().unwrap();
                 // Handle the special case for this opcode
                 let value1 = if param1 == 2 { pos1 + relative } else { value1 };
-                println!("dest: {value1} = {input_value}");
+                debug!("dest: {value1} = {input_value}");
                 *program
                     .get_mut::<usize>(value1.try_into().unwrap())
                     .unwrap() = input_value;
                 index += 2;
             }
             4 => {
-                println!("output: {value1}");
+                debug!("output: {value1}");
                 output.push(value1);
                 index += 2;
             }
@@ -209,7 +211,7 @@ pub fn run_program(program: &mut Vec<isize>, input: Vec<isize>) -> Vec<isize> {
                         }
                         *program.get::<usize>(pos2.try_into().unwrap()).unwrap()
                     };
-                    println!("Index = from: {pos2} = {value2}");
+                    debug!("Index = from: {pos2} = {value2}");
                     index = value2.try_into().unwrap();
                 } else {
                     index += 3;
@@ -241,7 +243,7 @@ pub fn run_program(program: &mut Vec<isize>, input: Vec<isize>) -> Vec<isize> {
                         }
                         *program.get::<usize>(pos2.try_into().unwrap()).unwrap()
                     };
-                    println!("Index = from: {pos2} = {value2}");
+                    debug!("Index = from: {pos2} = {value2}");
                     index = value2.try_into().unwrap();
                 } else {
                     index += 3;
@@ -276,13 +278,13 @@ pub fn run_program(program: &mut Vec<isize>, input: Vec<isize>) -> Vec<isize> {
                 // case here, and then fix this nightmare code later
                 let pos3 = *program.get(index + 3).unwrap();
                 let dest = if param3 == 2 {
-                    println!("pos3: {pos3}, relative: {relative}, result: {}", pos3 + relative);
+                    debug!("pos3: {pos3}, relative: {relative}, result: {}", pos3 + relative);
                     pos3 + relative
                 } else {
                     pos3
                 };
                 let store = if value1 < value2 { 1 } else { 0 };
-                println!("dest: {pos3}:{dest} = {store}. {pos1}:{value1} < {pos2}:{value2}");
+                debug!("dest: {pos3}:{dest} = {store}. {pos1}:{value1} < {pos2}:{value2}");
                 if dest as usize >= program.len() {
                     program
                         .try_reserve((dest + 1) as usize - program.len())
@@ -329,13 +331,13 @@ pub fn run_program(program: &mut Vec<isize>, input: Vec<isize>) -> Vec<isize> {
                 // case here, and then fix this nightmare code later
                 let pos3 = *program.get(index + 3).unwrap();
                 let dest = if param3 == 2 {
-                    println!("pos3: {pos3}, relative: {relative}, result: {}", pos3 + relative);
+                    debug!("pos3: {pos3}, relative: {relative}, result: {}", pos3 + relative);
                     pos3 + relative
                 } else {
                     pos3
                 };
                 let store = if value1 == value2 { 1 } else { 0 };
-                println!("dest: {dest} = {store}");
+                debug!("dest: {dest} = {store}");
                 if dest as usize >= program.len() {
                     program
                         .try_reserve((dest + 1) as usize - program.len())
@@ -355,7 +357,7 @@ pub fn run_program(program: &mut Vec<isize>, input: Vec<isize>) -> Vec<isize> {
             }
             9 => {
                 relative += value1;
-                println!("increased relative index by: {value1} to {relative}");
+                debug!("increased relative index by: {value1} to {relative}");
                 index += 2;
             }
             99 => {
@@ -372,6 +374,7 @@ pub fn run_program(program: &mut Vec<isize>, input: Vec<isize>) -> Vec<isize> {
 mod tests {
     use itertools::Itertools;
     use rstest::rstest;
+    use tracing::debug;
 
     use super::*;
 
@@ -415,7 +418,7 @@ mod tests {
         let input = include_str!("../../day-5/input.txt");
         let mut program = parse_program(input);
         let output = run_program(&mut program, vec![1]);
-        println!("Output: {output:?}");
+        debug!("Output: {output:?}");
         let result = output.last().unwrap().to_string();
         assert_eq!("15386262", result);
     }
@@ -425,7 +428,7 @@ mod tests {
         let input = include_str!("../../day-5/input.txt");
         let mut program = parse_program(input);
         let output = run_program(&mut program, vec![5]);
-        println!("Output: {output:?}");
+        debug!("Output: {output:?}");
         let result = output.last().unwrap().to_string();
         assert_eq!("10376124", result);
     }
